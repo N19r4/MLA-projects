@@ -1,0 +1,1 @@
+temat: "Uczenie ze wzmocnieniem (Reinforcement Learning) – od syntezy teorii związanej z RL do zastosowań RL w środowiskach symulacyjnych i systemach informatycznych"
