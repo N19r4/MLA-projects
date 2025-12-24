@@ -1,0 +1,119 @@
+\documentclass{beamer}
+
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+
+\title[Segmentacja Raka Płuc]{Segmentacja obrazu w wykrywaniu raka płuc}
+\subtitle{ML w systemach interakcji człowiek-maszyna}
+\author[Skowroński, Czuba, Grabarczyk, Kosek]{P. Skowroński, K. Czuba, K. Grabarczyk, I. Kosek}
+\institute[PolSla]{Politechnika Śląska \\ Wydział Matematyki Stosowanej}
+\date{Rok akademicki 2025/2026}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\begin{frame}{Zespół projektowy i role}
+    Projekt realizowany zgodnie z metodyką \textit{Project-based learning}
+    \begin{itemize}
+        \item \textbf{Piotr Skowroński} – Lider zespołu, dokumentacja LaTeX.
+        \item \textbf{Krzysztof Czuba} – Inżynier ML (Implementacja modelu).
+        \item \textbf{Kinga Grabarczyk} – Inżynier Danych (Metryki i preprocessing).
+        \item \textbf{Irek Kosek} – Specjalista HCI (Projekt interfejsu Streamlit).
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Konceptualizacja projektu}
+    Proces opracowania założeń projektu zespołowego oparto o Mapę Myśli
+        \begin{figure}
+            \centering
+            \includegraphics[width=\textwidth,height=0.3\textheight]{media/mind_map.png}
+            \caption{Struktura koncepcyjna.}
+        \end{figure}
+\end{frame}
+
+\begin{frame}{Podbudowa naukowa (Scientific Attribute)}
+    Wykorzystanie źródeł o charakterze naukowym
+    \begin{itemize}
+        \item \textbf{Architektura:} U-Net (Ronneberger et al., 2015).
+        \item \textbf{Framework:} MONAI (Medical Open Network for AI).
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Implementacja modelu (ML)}
+    \begin{columns}
+        \column{0.5\textwidth}
+        Detale techniczne modelu UNet:
+        \begin{itemize}
+            \item \textbf{Biblioteka:} MONAI.
+            \item \textbf{Rozmiar wejścia:} $512 \times 512$.
+            \item \textbf{Strata:} DiceLoss.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \begin{figure}
+            \centering
+            \includegraphics[width=\textwidth]{media/train_loss.png}
+            \caption{Przebieg procesu uczenia.}
+        \end{figure}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Wyniki ilościowe}
+    Ewaluacja na zbiorze testowym (10\% z 3000 obrazów):
+    \begin{table}
+        \centering
+        \begin{tabular}{|l|c|}
+            \hline
+            \textbf{Metryka} & \textbf{Wartość} \\
+            \hline
+            Average Dice Coefficient & \textbf{0.77} \\
+            \hline
+            Average IoU & 0.68 \\
+            \hline
+            Average Recall & 0.80 \\
+            \hline
+            Average Precision & 0.78 \\
+            \hline
+        \end{tabular}
+    \end{table}
+    Wysoki \textit{Recall} sugeruje wysoką czułość diagnostyczną modelu.
+\end{frame}
+
+\begin{frame}{System interakcji (HCI)}
+    \begin{itemize}
+        \item Interaktywne wgrywanie plików.
+        \item Wizualizacja masek i Probability Maps.
+    \end{itemize}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.7\textwidth]{media/app_screenshot.png}
+        \caption{Interfejs systemu wspomagania diagnostyki.}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Wizualizacja wyników segmentacji}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.9\textwidth]{media/model_predictions_comparison.png}
+        \caption{Porównanie: Oryginał vs Ground Truth vs Predykcja.}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{Podsumowanie}
+    \begin{itemize}
+        \item Opracowano kompletny scenariusz diagnostyczny.
+        \item Zintegrowano zaawansowane ML z interfejsem wspierającym lekarza.
+    \end{itemize}
+    \vspace{1cm}
+\end{frame}
+
+\end{document}
