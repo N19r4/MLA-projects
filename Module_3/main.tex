@@ -1,0 +1,159 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\selectlanguage{polish}
+\usepackage{graphicx}
+\usepackage[style=numeric,backend=biber]{biblatex}
+\usepackage{csquotes}
+\usepackage{float}
+
+
+\addbibresource{bib.bib} 
+
+\begin{document}
+
+\nocite{*}
+
+\pagenumbering{gobble}
+\clearpage
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.4\textwidth]{media/ps-logo.png} 
+\end{figure}
+
+\hspace{3cm}
+\begin{center}Dokumentacja projektowa\end{center}
+\begin{center}MLA 2025/2026\end{center}
+\hspace{3cm}
+
+\begin{center}
+\large\textbf{Aplikacje uczenia maszynowego \\w systemach interakcji człowiek-maszyna}
+\end{center}
+
+\hspace{7cm}
+\begin{flushright}
+Kierunek: Informatyka \\ 
+Specjalność: Uczenie Maszynowe \\
+Stopień: II
+\end{flushright}
+
+\begin{flushright}
+Członkowie zespołu:
+\par
+\textit{Piotr Skowroński - Lider Zespołu i Specjalista LaTeX}
+\par
+\textit{Krzysztof Czuba - Inżynier ML}
+\par
+\textit{Kinga Grabarczyk - Inżynier Danych}
+\par
+\textit{Irek Kosek - Specjalista HCI}
+\end{flushright}
+
+\vfill
+\begin{center}Gliwice, 2025/2026\end{center}
+
+\newpage
+
+\pagenumbering{arabic}
+\tableofcontents
+
+\newpage
+
+\section{Wprowadzenie}
+Niniejsza dokumentacja opisuje projekt zespołowy realizowany w ramach przedmiotu "Aplikacje uczenia maszynowego w systemach interakcji człowiek-maszyna". Projekt skupia się na problemie segmentacji obrazów medycznych w celu wykrywania zmian nowotworowych płuc.
+
+\subsection{Cel projektu}
+Głównym celem jest opracowanie i wytrenowanie modelu głębokiego uczenia, który pozwoli na automatyczne wyodrębnienie obszarów zajętych chorobą ze skanów tomografii komputerowej (CT). System ma służyć jako interaktywne wsparcie dla radiologa, przyspieszając proces diagnostyczny.
+
+\subsection{Zespół projektowy}
+Imię i Nazwisko 1 :: Inżynier ML :: Implementacja modelu MONAI UNet, pętla treningowa, ewaluacja metryk. \\
+Imię i Nazwisko 2 :: Specjalista HCI :: Projektowanie interfejsu interakcji, analiza Mapy Myśli, dokumentacja.
+
+\newpage
+
+\section{Założenia projektowe}
+Projekt realizowany jest zgodnie z metodyką Project-based learning, uwzględniając analizę źródeł naukowych dotyczących głębokich sieci splotowych w medycynie.
+
+\subsection{Koncepcja i Mapa Myśli}
+Proces konceptualizacji projektu został utrwalony w formie mapy myśli, uwzględniającej aspekty techniczne (ML) oraz użytkowe (HCI).
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth,height=0.15\textheight]{media/mind_map.png}
+\caption{Mapa myśli procesu konceptualizacji projektu.}
+\end{figure}
+
+\subsection{Zbiór danych i transformacje}
+Wykorzystano zbiór 3000 par obrazów (skany płuc i maski eksperckie). Zastosowano następujące transformacje danych:
+\begin{itemize}
+    \item Skalowanie intensywności do zakresu [0, 1].
+    \item Augmentacja: losowa rotacja o wielokrotność 90 stopni (p=0.5).
+    \item Standaryzacja rozmiaru przestrzennego do 512x512 pikseli.
+\end{itemize}
+
+\newpage
+
+\section{Implementacja}
+
+\subsection{Architektura modelu}
+Wykorzystano architekturę \textbf{UNet} z biblioteki MONAI o następujących parametrach:
+\begin{itemize}
+    \item Wymiary przestrzenne: 2D.
+    \item Kanały wejściowe/wyjściowe: 1.
+    \item Struktura kanałów: (16, 32, 64, 128, 256) ze strefami kroku (strides) równymi 2.
+    \item Jednostki rezydualne: 2 na każdym poziomie.
+\end{itemize}
+
+\subsection{Proces treningowy}
+Model trenowano z użyciem optymalizatora Adam ($lr=0.001$) oraz funkcji straty \textbf{DiceLoss} z aktywacją sigmoid. Zastosowano mechanizm \textit{ReduceLROnPlateau} do dynamicznej regulacji tempa uczenia.
+
+\newpage
+
+\section{Badania}
+Ewaluacja modelu została przeprowadzona na wydzielonym zbiorze testowym (10\% danych).
+
+\subsection{Metryki ilościowe}
+Wyniki uzyskane na zbiorze testowym prezentują się następująco:
+\begin{itemize}
+    \item \textbf{Average Dice Coefficient: 0.77}
+    \item \textbf{Average Intersection over Union (IoU): 0.68}
+    \item Average Recall: 0.80
+    \item Average Precision: 0.78
+\end{itemize}
+
+\subsection{Analiza wizualna}
+Poniżej przedstawiono przebieg funkcji straty oraz przykładowe predykcje modelu na tle masek wzorcowych.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth,height=\textheight,keepaspectratio]{media/train_loss.png}
+\includegraphics[width=0.8\textwidth,height=\textheight,keepaspectratio]{media/val_loss.png}
+\caption{Wykresy funkcji straty dla zbioru treningowego i walidacyjnego.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\textwidth,height=\textheight,keepaspectratio]{media/model_predictions_comparison.png}
+\caption{Wizualizacja predykcji: Obraz oryginalny, Ground Truth, Predykcja oraz Nałożenie.}
+\end{figure}
+
+\newpage
+
+\section{Podsumowanie i wnioski}
+
+\begin{itemize}
+    \item \textbf{Podsumowanie:} W ramach projektu pomyślnie wytrenowano model UNet z biblioteki MONAI na zbiorze 3000 obrazów CT. Model osiągnął satysfakcjonujące wyniki metryczne: współczynnik Dice na poziomie 0,77 oraz IoU równy 0,68. Proces treningu (400 epok) przebiegał stabilnie, co potwierdzają wygenerowane wykresy funkcji straty, wykazujące zbieżność zarówno na zbiorze treningowym, jak i walidacyjnym.
+    \item \textbf{Wnioski techniczne (ML):} Wysoka wartość metryki Recall (0,80) w stosunku do Precision (0,78) sugeruje, że model jest dobrze zoptymalizowany pod kątem czułości diagnostycznej. W badaniach przesiewowych raka płuc priorytetem jest minimalizacja wyników fałszywie ujemnych, co udało się osiągnąć. Analiza map różnicowych (Difference Maps) wskazuje, że ewentualne błędy wynikają głównie z trudności w precyzyjnym wyznaczaniu granic mniejszych zmian nowotworowych.
+    \item \textbf{Wnioski HCI:} Zastosowanie nakładek wizualnych (Overlay Comparison) oraz map prawdopodobieństwa stanowi kluczowy element interakcji człowiek-maszyna. Pozwala to radiologowi na błyskawiczną weryfikację obszarów wskazanych przez algorytm, co w praktyce klinicznej może skrócić czas opisu badania przy jednoczesnym zachowaniu wysokiej czujności diagnostycznej.
+\end{itemize}
+
+
+\newpage
+\section{Spis literatury}
+\printbibliography[heading=none] 
+
+\end{document}

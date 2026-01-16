@@ -56,16 +56,16 @@
 
 \subsection{Zakres tematyczny sprawozdania}
 
-Niniejsze sprawozdanie obejmuje zagadnienia związane z uczeniem ze wzmocnieniem (Reinforcement Learning), które stanowi jeden z trzech głównych paradygmatów uczenia maszynowego obok uczenia nadzorowanego i nienadzorowanego. Dokument koncentruje się na aspektach teoretycznych oraz praktycznych implementacji algorytmów RL w systemach interakcji człowiek-maszyna.
+Niniejsze sprawozdanie stanowi realizację pierwiastka teoretycznego i praktycznego w zakresie identyfikacji i analizy aktualnego stanu dziedziny Uczenia Maszynowego (Machine Learning -- ML). Dokument przedstawia ogólny przegląd głównych paradygmatów uczenia maszynowego, takich jak uczenie nadzorowane i nienadzorowane, ze szczególnym uwzględnieniem Uczenia ze Wzmocnieniem (Reinforcement Learning -- RL).
 
-Reinforcement Learning to metoda uczenia maszynowego, w której agent uczy się podejmować optymalne decyzje poprzez interakcję ze środowiskiem. Agent otrzymuje nagrody lub kary za swoje działania i na tej podstawie optymalizuje swoją strategię postępowania. Ta forma uczenia znajduje szerokie zastosowanie w robotyce, grach, systemach rekomendacyjnych oraz autonomicznych pojazdach.
+Wybór RL jako głównego obszaru badawczego w ramach pracy zespołu projektowego wynika z jego rosnącego znaczenia w systemach autonomicznych i interakcji człowiek-maszyna. Sprawozdanie omawia teoretyczne podstawy algorytmów uczących się, a także praktyczne aspekty ich implementacji z wykorzystaniem nowoczesnych frameworków.
 
 \subsection{Zespół projektowy}
 
 \begin{itemize}
-\item \textbf{Piotr Skowroński} -- Lider zespołu -- Analiza teoretyczna algorytmów RL, przygotowanie sekcji teoretycznej
-\item \textbf{Kinga Grabarczyk} -- Programista -- Implementacja algorytmów Q-Learning i Deep Q-Network, testy eksperymentalne
-\item \textbf{Irek Kosek} -- Analityk -- Zbieranie źródeł literaturowych, analiza wyników, dokumentacja
+\item \textbf{Piotr Skowroński} -- Lider zespołu -- Koordynacja prac, analiza algorytmów RL
+\item \textbf{Kinga Grabarczyk} -- Analityk treści -- Analiza zagadnień teoretycznych, przygotowanie przeglądu paradygmatów uczenia maszynowego oraz opracowanie teorii metod uczenia
+\item \textbf{Irek Kosek} -- Analityk danych -- Zbieranie źródeł literaturowych, analiza wyników, dokumentacja
 \item \textbf{Krzysztof Czuba} -- Specjalista ds. praktycznych -- Analiza narzędzi i frameworków, przygotowanie sekcji praktycznej
 \end{itemize}
 
@@ -75,49 +75,53 @@ Reinforcement Learning to metoda uczenia maszynowego, w której agent uczy się 
 
 \subsection{Wprowadzenie do części teoretycznej}
 
-Uczenie ze wzmocnieniem opiera się na paradygmacie uczenia się poprzez próby i błędy, gdzie agent stara się maksymalizować kumulatywną nagrodę w długim okresie czasu. Podstawowym modelem formalnym opisującym problemy RL jest Markov Decision Process (MDP), który składa się z następujących elementów:
+Uczenie maszynowe to obszar sztucznej inteligencji poświęcony algorytmom, które poprawiają swoje działanie poprzez doświadczenie. Zgodnie z aktualnym stanem dziedziny, wyróżniamy trzy główne paradygmaty uczenia, które znajdują zastosowanie w zależności od dostępności danych i zdefiniowanego problemu:
 
-\begin{itemize}
-\item \textbf{Zbiór stanów S} -- możliwe stany środowiska
-\item \textbf{Zbiór akcji A} -- możliwe działania agenta
-\item \textbf{Funkcja przejścia P(s'|s,a)} -- prawdopodobieństwo przejścia do stanu s' przy wykonaniu akcji a w stanie s
-\item \textbf{Funkcja nagrody R(s,a,s')} -- nagroda otrzymana za wykonanie akcji
-\item \textbf{Współczynnik dyskontowania $\gamma$} -- określa wagę przyszłych nagród
-\end{itemize}
+\begin{enumerate}
+    \item \textbf{Uczenie nadzorowane (Supervised Learning)} -- oparte na danych etykietowanych, gdzie model uczy się mapowania wejścia na wyjście.
+    \item \textbf{Uczenie nienadzorowane (Unsupervised Learning)} -- służące do odkrywania ukrytych struktur w danych nieetykietowanych.
+    \item \textbf{Uczenie ze wzmocnieniem (Reinforcement Learning)} -- oparte na interakcji agenta ze środowiskiem w celu maksymalizacji nagrody.
+\end{enumerate}
+
+Podstawowym modelem formalnym dla problemów decyzyjnych w ML, a w szczególności w RL, jest proces decyzyjny Markowa (MDP).
 
 \subsection{Rozwinięcie}
 
-W uczeniu ze wzmocnieniem wyróżniamy kilka kluczowych podejść i algorytmów:
+W celu pełnego opracowania stanu dziedziny, poniżej scharakteryzowano krótko klasyczne podejścia, by następnie przejść do pogłębionej analizy uczenia ze wzmocnieniem.
 
-\subsubsection{Metody oparte na wartości (Value-Based Methods)}
+\subsubsection{Przegląd paradygmatów ML}
 
-Q-Learning jest podstawowym algorytmem uczenia ze wzmocnieniem, który uczy się funkcji wartości akcji Q(s,a) reprezentującej oczekiwaną kumulatywną nagrodę za wykonanie akcji a w stanie s i postępowanie optymalnie dalej. Algorytm aktualizuje wartości Q zgodnie z równaniem Bellmana:
+\textbf{Uczenie nadzorowane} jest najczęściej stosowanym podejściem w biznesie. Obejmuje zadania \textit{klasyfikacji} (przypisywanie danych do dyskretnych kategorii) oraz \textit{regresji} (przewidywanie wartości ciągłych). Wymaga ono zbioru treningowego zawierającego poprawne odpowiedzi (etykiety). Popularne algorytmy to m.in. maszyny wektorów nośnych (SVM) czy głębokie sieci neuronowe.
+
+\textbf{Uczenie nienadzorowane} nie wykorzystuje etykiet. Jego celem jest znalezienie wzorców w danych, np. poprzez \textit{klasteryzację} (grupowanie podobnych obiektów) lub redukcję wymiarowości (np. PCA). Jest kluczowe w eksploracyjnej analizie danych.
+
+\subsubsection{Szczegółowa analiza Uczenia ze Wzmocnieniem (RL)}
+
+Jako główny przedmiot badań w tym projekcie, RL wyróżnia się brakiem nadzoru w postaci gotowych etykiet. Agent uczy się poprzez metodę prób i błędów. Wyróżniamy tu następujące kluczowe podejścia:
+
+\paragraph{Metody oparte na wartości (Value-Based Methods)}
+Q-Learning jest podstawowym algorytmem uczenia ze wzmocnieniem, który uczy się funkcji wartości akcji $Q(s,a)$. Algorytm aktualizuje wartości Q zgodnie z równaniem Bellmana:
 
 $$Q(s,a) \leftarrow Q(s,a) + \alpha \left[R + \gamma \max_{a'} Q(s',a') - Q(s,a)\right]$$
 
-gdzie $\alpha$ to współczynnik uczenia, a $\gamma$ współczynnik dyskontowania przyszłych nagród.
+gdzie $\alpha$ to współczynnik uczenia, a $\gamma$ współczynnik dyskontowania przyszłych nagród. SARSA to alternatywa typu on-policy, która aktualizuje wartości na podstawie rzeczywiście wykonanej akcji.
 
-SARSA (State-Action-Reward-State-Action) to algorytm on-policy, który w przeciwieństwie do Q-Learning aktualizuje wartości Q na podstawie rzeczywiście wykonanej akcji, a nie maksymalnej wartości. To czyni go bardziej konserwatywnym i bezpieczniejszym w niektórych zastosowaniach.
-
-\subsubsection{Metody oparte na polityce (Policy-Based Methods)}
-
-Policy Gradient Methods bezpośrednio optymalizują parametryzowaną politykę poprzez gradient wznoszenia. Algorytmy takie jak REINFORCE czy Actor-Critic łączą zalety metod wartości i polityki, gdzie critic ocenia wartość stanów, a actor aktualizuje politykę.
+\paragraph{Metody oparte na polityce (Policy-Based Methods)}
+Policy Gradient Methods bezpośrednio optymalizują parametryzowaną politykę poprzez gradient wznoszenia. Algorytmy takie jak REINFORCE czy Actor-Critic łączą zalety metod wartości i polityki.
 
 \subsubsection{Deep Reinforcement Learning}
 
-Deep Q-Network (DQN) łączy Q-Learning z głębokimi sieciami neuronowymi, co umożliwia radzenie sobie z problemami o dużej przestrzeni stanów. Kluczowe innowacje DQN to experience replay (ponowne wykorzystanie przeszłych doświadczeń) oraz target network (stabilizacja uczenia).
-
-Proximal Policy Optimization (PPO) to nowoczesny algorytm, który osiąga balans między wydajnością uczenia a stabilnością poprzez ograniczenie wielkości aktualizacji polityki.
+Połączenie klasycznego ML (sieci neuronowe) z RL dało początek Deep RL.
+\textbf{Deep Q-Network (DQN)} łączy Q-Learning z głębokimi sieciami neuronowymi, co umożliwia radzenie sobie z problemami o dużej przestrzeni stanów. Kluczowe innowacje DQN to experience replay oraz target network.
+\textbf{Proximal Policy Optimization (PPO)} to nowoczesny algorytm, który osiąga balans między wydajnością uczenia a stabilnością.
 
 \subsubsection{Exploration vs Exploitation}
 
-Fundamentalnym dylematem w RL jest balans między eksploracją (poznawaniem nowych akcji) a eksploatacją (wykorzystywaniem znanej wiedzy). Popularne strategie to epsilon-greedy, gdzie agent z prawdopodobieństwem $\epsilon$ wybiera losową akcję, oraz Upper Confidence Bound (UCB), który bardziej systematycznie balansuje eksplorację i eksploatację.
+Fundamentalnym dylematem w RL jest balans między eksploracją (poznawaniem nowych akcji) a eksploatacją (wykorzystywaniem znanej wiedzy). Popularne strategie to epsilon-greedy oraz Upper Confidence Bound (UCB).
 
 \subsection{Podsumowanie części teoretycznej}
 
-Uczenie ze wzmocnieniem stanowi potężne narzędzie do rozwiązywania problemów sekwencyjnego podejmowania decyzji. Kluczowe koncepcje obejmują Markov Decision Processes, funkcje wartości, polityki oraz równanie Bellmana. Nowoczesne podejścia łączą klasyczne algorytmy RL z głębokim uczeniem, co umożliwia rozwiązywanie złożonych problemów praktycznych.
-
-Teoretyczne podstawy RL znajdują zastosowanie w szerokim spektrum dziedzin -- od gier i robotyki, przez systemy rekomendacyjne, po optymalizację procesów biznesowych i sterowanie autonomicznymi pojazdami. Rozwój algorytmów takich jak DQN, PPO czy AlphaGo pokazuje, że RL jest kluczową technologią w rozwoju sztucznej inteligencji.
+Analiza stanu dziedziny wskazuje na dynamiczny rozwój wszystkich gałęzi uczenia maszynowego. Podczas gdy uczenie nadzorowane dominuje w analizie danych statycznych, uczenie ze wzmocnieniem (wsparte głębokimi sieciami neuronowymi) staje się kluczową technologią w systemach decyzyjnych i robotyce. Teoretyczne podstawy obejmujące MDP, funkcje wartości i polityki znajdują zastosowanie w szerokim spektrum dziedzin.
 
 \newpage
 
@@ -125,55 +129,43 @@ Teoretyczne podstawy RL znajdują zastosowanie w szerokim spektrum dziedzin -- o
 
 \subsection{Wprowadzenie do części praktycznej}
 
-Praktyczne zastosowania uczenia ze wzmocnieniem obejmują wiele dziedzin życia codziennego i przemysłu. W tej sekcji prezentujemy przegląd istniejących narzędzi, bibliotek oraz systemów implementujących algorytmy RL, a także przykłady ich zastosowań w rzeczywistych projektach.
+Praktyczne zastosowania uczenia maszynowego wymagają wykorzystania zaawansowanych narzędzi programistycznych. W tej sekcji prezentujemy przegląd istniejących bibliotek oraz systemów, ze szczególnym uwzględnieniem tych wspierających algorytmy RL.
 
 \subsection{Rozwinięcie}
 
-\subsubsection{Biblioteki i frameworki do Reinforcement Learning}
+\subsubsection{Biblioteki i frameworki}
 
-\textbf{OpenAI Gym} to standardowa platforma do tworzenia i testowania algorytmów RL. Oferuje szeroki zestaw środowisk testowych, od prostych problemów jak CartPole, przez klasyczne gry Atari, po złożone symulacje robotyczne. Gym definiuje ujednolicony interfejs dla środowisk, co ułatwia porównywanie algorytmów.
+Współczesne uczenie maszynowe opiera się na potężnych bibliotekach numerycznych, takich jak \textbf{TensorFlow} (opracowany przez Google) czy \textbf{PyTorch}. Stanowią one bazę dla tworzenia sieci neuronowych (CNN, RNN) i są fundamentem dla specjalistycznych narzędzi RL:
 
-\textbf{Stable Baselines3} to zbiór implementacji najnowocześniejszych algorytmów RL (A2C, PPO, SAC, TD3) w PyTorch. Biblioteka oferuje wysoki poziom abstrakcji i łatwość użycia, co czyni ją idealną dla praktyków i badaczy.
+\textbf{OpenAI Gym} to standardowa platforma do tworzenia i testowania algorytmów RL. Oferuje szeroki zestaw środowisk testowych i definiuje ujednolicony interfejs API.
 
-\textbf{TensorFlow Agents (TF-Agents)} to modułowa biblioteka od Google do budowania, trenowania i ewaluacji algorytmów RL w TensorFlow. Oferuje elastyczną architekturę oraz zoptymalizowane implementacje popularnych algorytmów.
+\textbf{Stable Baselines3} to zbiór implementacji najnowocześniejszych algorytmów RL (A2C, PPO, SAC, TD3) w PyTorch. Biblioteka oferuje wysoki poziom abstrakcji i łatwość użycia.
 
-\textbf{Ray RLlib} to skalowalna biblioteka dla rozproszonego uczenia ze wzmocnieniem. Umożliwia trening na wielu maszynach i oferuje implementacje najnowszych algorytmów z możliwością łatwego skalowania.
+\textbf{TensorFlow Agents (TF-Agents)} to modułowa biblioteka do budowania, trenowania i ewaluacji algorytmów RL w ekosystemie TensorFlow.
+
+\textbf{Ray RLlib} to skalowalna biblioteka dla rozproszonego uczenia ze wzmocnieniem, umożliwiająca trening na wielu maszynach.
 
 \subsubsection{Praktyczne zastosowania RL}
 
-\textbf{Gry i rozrywka:} AlphaGo od DeepMind wykorzystuje zaawansowane techniki RL do gry w Go, osiągając poziom przewyższający najlepszych ludzkich graczy. OpenAI Five pokazało możliwości RL w złożonych grach wieloosobowych jak Dota 2.
+\textbf{Gry i rozrywka:} AlphaGo od DeepMind oraz OpenAI Five pokazują możliwości RL w złożonych grach strategicznych.
 
-\textbf{Robotyka:} RL jest szeroko stosowany w robotyce do uczenia manipulacji obiektami, chodu robotów oraz planowania trajektorii. Systemy takie jak roboty Boston Dynamics wykorzystują RL do optymalizacji ruchów.
+\textbf{Robotyka:} RL jest szeroko stosowany do uczenia manipulacji obiektami, chodu robotów oraz planowania trajektorii (np. Boston Dynamics).
 
-\textbf{Autonomiczne pojazdy:} Firmy takie jak Waymo i Tesla wykorzystują RL do trenowania systemów podejmowania decyzji w autonomicznych pojazdach, gdzie agent musi nauczyć się bezpiecznego poruszania w dynamicznym środowisku drogowym.
+\textbf{Autonomiczne pojazdy:} Firmy takie jak Waymo i Tesla wykorzystują RL do trenowania systemów podejmowania decyzji w ruchu drogowym.
 
-\textbf{Systemy rekomendacyjne:} Netflix i YouTube wykorzystują RL do personalizacji rekomendacji treści, gdzie agent uczy się maksymalizować długoterminowe zaangażowanie użytkowników.
+\textbf{Systemy rekomendacyjne:} Netflix i YouTube wykorzystują RL do personalizacji treści w celu maksymalizacji zaangażowania użytkowników.
 
-\textbf{Optymalizacja zasobów:} Google wykorzystuje RL do optymalizacji zużycia energii w centrach danych, osiągając znaczące oszczędności poprzez inteligentne zarządzanie systemami chłodzenia.
-
-\textbf{Finanse i trading:} Algorytmy RL są stosowane w algorytmicznym tradingu, gdzie agent uczy się optymalnych strategii inwestycyjnych na podstawie danych rynkowych.
-
-\subsubsection{Środowiska i symulatory}
-
-\textbf{MuJoCo} (Multi-Joint dynamics with Contact) to zaawansowany silnik fizyki używany do symulacji robotów i układów mechanicznych. Jest powszechnie stosowany w badaniach nad RL w robotyce.
-
-\textbf{Unity ML-Agents} to framework od Unity Technologies umożliwiający trenowanie inteligentnych agentów w środowisku 3D. Szczególnie popularny w trenowaniu AI do gier.
-
-\textbf{PettingZoo} oferuje środowiska dla multi-agent reinforcement learning, gdzie wiele agentów uczy się jednocześnie i może współpracować lub konkurować.
+\textbf{Optymalizacja zasobów:} Zastosowanie w zarządzaniu zużyciem energii w centrach danych (Google).
 
 \subsubsection{Wyzwania praktyczne}
 
-\textbf{Sample efficiency} pozostaje głównym wyzwaniem -- algorytmy RL często wymagają milionów interakcji ze środowiskiem do nauczenia się skutecznej polityki. Transfer learning i meta-learning są badane jako potencjalne rozwiązania.
-
-\textbf{Stabilność uczenia} w RL jest trudniejsza niż w uczeniu nadzorowanym z powodu niestacjonarności danych (polityka agenta zmienia rozkład danych) oraz bootstrappingu (uczenie wartości na podstawie oszacowań innych wartości).
-
-\textbf{Bezpieczeństwo i etyka} w RL są kluczowe, szczególnie w aplikacjach takich jak autonomiczne pojazdy czy medycyna, gdzie błędy mogą mieć poważne konsekwencje.
+\textbf{Sample efficiency} -- algorytmy RL często wymagają milionów interakcji ze środowiskiem.
+\textbf{Stabilność uczenia} -- wyzwanie związane z niestacjonarnością danych i bootstrappingiem.
+\textbf{Bezpieczeństwo i etyka} -- kluczowe w aplikacjach krytycznych (np. pojazdy autonomiczne, medycyna).
 
 \subsection{Podsumowanie części praktycznej}
 
-Ekosystem narzędzi do Reinforcement Learning znacznie się rozwinął w ostatnich latach, oferując zarówno badaczom jak i praktykom szeroki wybór bibliotek i frameworków. OpenAI Gym ustanowił standard dla środowisk testowych, podczas gdy biblioteki jak Stable Baselines3 i RLlib oferują gotowe implementacje najnowocześniejszych algorytmów.
-
-Praktyczne zastosowania RL rozciągają się od gier i rozrywki, przez robotykę i autonomiczne pojazdy, po optymalizację biznesową i finanse. Pomimo imponujących sukcesów, wyzwania związane z efektywnością próbkowania, stabilnością uczenia i bezpieczeństwem pozostają aktywnymi obszarami badań. Rozwój technik takich jak model-based RL, offline RL i multi-agent RL otwiera nowe możliwości dla przyszłych zastosowań.
+Ekosystem narzędzi ML i RL rozwinął się znacząco, oferując gotowe implementacje w bibliotekach takich jak Stable Baselines3 czy TF-Agents. Praktyczne zastosowania obejmują szerokie spektrum dziedzin, od gier po optymalizację biznesową. Pomimo sukcesów, wyzwania związane z efektywnością i bezpieczeństwem pozostają kluczowymi obszarami dalszych prac inżynierskich.
 
 \newpage
 
@@ -181,30 +173,18 @@ Praktyczne zastosowania RL rozciągają się od gier i rozrywki, przez robotykę
 
 \subsection{Podsumowanie}
 
-Reinforcement Learning stanowi jeden z najdynamiczniej rozwijających się obszarów uczenia maszynowego, oferując unikalne możliwości rozwiązywania problemów sekwencyjnego podejmowania decyzji. W sprawozdaniu przedstawiono zarówno fundamenty teoretyczne RL, obejmujące Markov Decision Processes, funkcje wartości oraz polityki, jak i praktyczne aspekty implementacji algorytmów w rzeczywistych systemach.
-
-Część teoretyczna skupiła się na kluczowych algorytmach, takich jak Q-Learning, SARSA, Policy Gradient Methods oraz nowoczesnych rozszerzeniach jak DQN i PPO. Przedstawiono również fundamentalny dylemat exploration-exploitation oraz metody jego rozwiązywania.
-
-Część praktyczna omówiła ekosystem narzędzi i bibliotek dostępnych dla praktyków RL, włączając OpenAI Gym, Stable Baselines3, TensorFlow Agents i Ray RLlib. Zaprezentowano szerokie spektrum zastosowań -- od gier i robotyki po systemy rekomendacyjne i optymalizację biznesową.
+Uczenie Maszynowe, w tym Reinforcement Learning, stanowi dynamicznie rozwijający się obszar AI. W sprawozdaniu przedstawiono fundamenty teoretyczne obejmujące główne paradygmaty uczenia (nadzorowane, nienadzorowane, RL) oraz szczegółowo omówiono mechanizmy RL (MDP, Q-Learning, PPO). Część praktyczna ukazała bogaty ekosystem narzędzi (TensorFlow, OpenAI Gym) oraz ich realne wdrożenia.
 
 \subsection{Wnioski}
 
-Po przeprowadzeniu analizy teoretycznej i praktycznej uczenia ze wzmocnieniem można sformułować następujące wnioski:
+Po przeprowadzeniu analizy teoretycznej i praktycznej można sformułować następujące wnioski:
 
 \begin{enumerate}
-\item RL oferuje unikalne możliwości w problemach gdzie trudno zdefiniować explicite funkcję celu, ale możemy określić nagrody za pożądane zachowania. To czyni go idealnym do zastosowań w robotyce, grach i systemach autonomicznych.
-
-\item Pomimo imponujących projektów takich jak AlphaGo czy OpenAI Five, RL wciąż boryka się z istotnymi wyzwaniami praktycznymi. Sample efficiency pozostaje główną barierą -- większość algorytmów wymaga ogromnej liczby interakcji ze środowiskiem, co w realnych zastosowaniach może być kosztowne lub niebezpieczne.
-
-\item Połączenie klasycznych algorytmów RL z głębokim uczeniem (Deep RL) znacząco rozszerzyło możliwości tej technologii, umożliwiając pracę z wysokowymiarowymi przestrzeniami stanów i akcji. Jednak wprowadza to dodatkowe wyzwania związane ze stabilnością uczenia.
-
-\item Rozwój gotowych bibliotek i frameworków znacznie obniżył próg wejścia dla praktyków chcących wykorzystać RL. Narzędzia takie jak Stable Baselines3 oferują implementacje state-of-the-art algorytmów, które można łatwo zastosować do własnych problemów.
-
-\item Bezpieczeństwo i etyka w RL są kluczowe, szczególnie w zastosowaniach krytycznych jak autonomiczne pojazdy czy medycyna. Potrzeba dalszych badań nad safe RL oraz metodami weryfikacji i walidacji nauczonych polityk.
-
-\item Przyszłość RL leży w rozwoju technik takich jak meta-learning (uczenie się uczenia), model-based RL (wykorzystujący modele środowiska do zwiększenia efektywności), offline RL (uczenie z wcześniej zebranych danych) oraz multi-agent RL (współpraca i konkurencja wielu agentów).
-
-\item Integracja RL z systemami interakcji człowiek-maszyna otwiera nowe możliwości dla personalizacji i adaptacji systemów do indywidualnych użytkowników. Systemy mogą uczyć się preferencji użytkowników i dynamicznie dostosowywać swoje zachowanie.
+\item Uczenie maszynowe oferuje uniwersalne metody rozwiązywania problemów klasyfikacji i regresji, podczas gdy RL jest niezastąpiony w problemach sekwencyjnego podejmowania decyzji.
+\item Integracja algorytmów RL z głębokim uczeniem (Deep RL) pozwala na rozwiązywanie problemów o wysokiej złożoności, choć wiąże się to z wyzwaniami stabilności treningu.
+\item Dostępność gotowych bibliotek (np. Stable Baselines3) obniża próg wejścia, ale skuteczne wdrożenie wymaga zrozumienia teoretycznych podstaw algorytmów.
+\item Przyszłość dziedziny leży w rozwoju technik takich jak meta-learning, offline RL oraz bezpieczne AI, co pozwoli na szersze zastosowanie w systemach krytycznych.
+\item Rozwój systemów interakcji człowiek-maszyna będzie w coraz większym stopniu polegał na adaptacyjnych algorytmach uczących się preferencji użytkownika.
 \end{enumerate}
 
 \newpage
@@ -214,53 +194,53 @@ Po przeprowadzeniu analizy teoretycznej i praktycznej uczenia ze wzmocnieniem mo
 \begin{thebibliography}{99}
 
 \bibitem{sutton2018}
-Sutton, R. S., \& Barto, A. G. (2018). 
-\textit{Reinforcement Learning: An Introduction} (2nd ed.). 
+Sutton, R. S., \& Barto, A. G. (2018).
+\textit{Reinforcement Learning: An Introduction} (2nd ed.).
 MIT Press.
 
 \bibitem{mnih2015}
-Mnih, V., Kavukcuoglu, K., Silver, D., et al. (2015). 
-Human-level control through deep reinforcement learning. 
+Mnih, V., Kavukcuoglu, K., Silver, D., et al. (2015).
+Human-level control through deep reinforcement learning.
 \textit{Nature}, 518(7540), 529--533.
 
 \bibitem{silver2016}
-Silver, D., Huang, A., Maddison, C. J., et al. (2016). 
-Mastering the game of Go with deep neural networks and tree search. 
+Silver, D., Huang, A., Maddison, C. J., et al. (2016).
+Mastering the game of Go with deep neural networks and tree search.
 \textit{Nature}, 529(7587), 484--489.
 
 \bibitem{schulman2017}
-Schulman, J., Wolski, F., Dhariwal, P., Radford, A., \& Klimov, O. (2017). 
-Proximal policy optimization algorithms. 
+Schulman, J., Wolski, F., Dhariwal, P., Radford, A., \& Klimov, O. (2017).
+Proximal policy optimization algorithms.
 \textit{arXiv preprint arXiv:1707.06347}.
 
 \bibitem{brockman2016}
-Brockman, G., Cheung, V., Pettersson, L., et al. (2016). 
-OpenAI Gym. 
+Brockman, G., Cheung, V., Pettersson, L., et al. (2016).
+OpenAI Gym.
 \textit{arXiv preprint arXiv:1606.01540}.
 
 \bibitem{raffin2021}
-Raffin, A., Hill, A., Gleave, A., Kanervisto, A., Ernestus, M., \& Dormann, N. (2021). 
-Stable-Baselines3: Reliable reinforcement learning implementations. 
+Raffin, A., Hill, A., Gleave, A., Kanervisto, A., Ernestus, M., \& Dormann, N. (2021).
+Stable-Baselines3: Reliable reinforcement learning implementations.
 \textit{Journal of Machine Learning Research}, 22(268), 1--8.
 
 \bibitem{watkins1992}
-Watkins, C. J., \& Dayan, P. (1992). 
-Q-learning. 
+Watkins, C. J., \& Dayan, P. (1992).
+Q-learning.
 \textit{Machine Learning}, 8(3-4), 279--292.
 
 \bibitem{lillicrap2015}
-Lillicrap, T. P., Hunt, J. J., Pritzel, A., et al. (2015). 
-Continuous control with deep reinforcement learning. 
+Lillicrap, T. P., Hunt, J. J., Pritzel, A., et al. (2015).
+Continuous control with deep reinforcement learning.
 \textit{arXiv preprint arXiv:1509.02971}.
 
 \bibitem{haarnoja2018}
-Haarnoja, T., Zhou, A., Abbeel, P., \& Levine, S. (2018). 
-Soft actor-critic: Off-policy maximum entropy deep reinforcement learning with a stochastic actor. 
+Haarnoja, T., Zhou, A., Abbeel, P., \& Levine, S. (2018).
+Soft actor-critic: Off-policy maximum entropy deep reinforcement learning with a stochastic actor.
 \textit{International Conference on Machine Learning}, 1861--1870.
 
 \bibitem{vinyals2019}
-Vinyals, O., Babuschkin, I., Czarnecki, W. M., et al. (2019). 
-Grandmaster level in StarCraft II using multi-agent reinforcement learning. 
+Vinyals, O., Babuschkin, I., Czarnecki, W. M., et al. (2019).
+Grandmaster level in StarCraft II using multi-agent reinforcement learning.
 \textit{Nature}, 575(7782), 350--354.
 
 \end{thebibliography}
