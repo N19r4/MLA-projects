@@ -5,6 +5,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern}
 \usepackage{graphicx}
+\usepackage{amsmath}
 
 \usetheme{Madrid}
 \usecolortheme{default}
@@ -40,6 +41,21 @@
         \end{figure}
 \end{frame}
 
+\begin{frame}{Zbiór danych}
+    \textbf{Lung Cancer Segmentation Dataset} (Kaggle)
+    \begin{itemize}
+        \item \textbf{3000 par obrazów:} skany CT płuc + maski eksperckie
+        \item \textbf{Format:} obrazy w skali szarości, binarne maski segmentacyjne
+        \item \textbf{Podział:} 70\% trening / 20\% walidacja / 10\% test
+    \end{itemize}
+    \vspace{0.3cm}
+    \textbf{Transformacje danych:}
+    \begin{itemize}
+        \item Normalizacja intensywności do zakresu [0, 1]
+        \item Augmentacja: rotacja o wielokrotność $90$ (p=0.5)
+    \end{itemize}
+\end{frame}
+
 \begin{frame}{Podbudowa naukowa (Scientific Attribute)}
     Wykorzystanie źródeł o charakterze naukowym
     \begin{itemize}
@@ -48,14 +64,51 @@
     \end{itemize}
 \end{frame}
 
+\begin{frame}{Architektura U-Net}
+    Symetryczna struktura w kształcie litery „U":
+    \begin{itemize}
+        \item \textbf{Encoder (ścieżka kurczenia):}
+        \begin{itemize}
+            \item Ekstrakcja cech przez warstwy konwolucyjne 3x3 + ReLU
+            \item Max pooling 2x2 — redukcja rozdzielczości
+            \item Podwajanie liczby kanałów na każdym poziomie
+        \end{itemize}
+        \item \textbf{Decoder (ścieżka ekspansji):}
+        \begin{itemize}
+            \item Up-convolution 2x2 — zwiększanie rozdzielczości
+            \item Rekonstrukcja przestrzenna segmentacji
+        \end{itemize}
+        \item \textbf{Skip Connections:}
+        \begin{itemize}
+            \item Łączenie odpowiadających poziomów encoder-decoder
+            \item Zachowanie szczegółów przestrzennych dla precyzyjnych granic
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Schemat architektury U-Net}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{./unet.png}
+        \caption{Schemat architektury U-Net (Ronneberger et al., 2015).}
+    \end{figure}
+\end{frame}
+
 \begin{frame}{Implementacja modelu (ML)}
     \begin{columns}
         \column{0.5\textwidth}
-        Detale techniczne modelu UNet:
+        \textbf{Konfiguracja MONAI UNet:}
         \begin{itemize}
-            \item \textbf{Biblioteka:} MONAI.
-            \item \textbf{Rozmiar wejścia:} $512 \times 512$.
-            \item \textbf{Strata:} DiceLoss.
+            \item Wymiary: 2D
+            \item Wejście/Wyjście: 1 kanał
+            \item Kanały: (16, 32, 64, 128, 256)
+            \item Strides: (2, 2, 2, 2)
+        \end{itemize}
+        \vspace{0.2cm}
+        \textbf{Trening:}
+        \begin{itemize}
+            \item Adam ($lr=0.001$)
+            \item 400 epok, batch=64
         \end{itemize}
         \column{0.5\textwidth}
         \begin{figure}
@@ -66,25 +119,70 @@
     \end{columns}
 \end{frame}
 
+\begin{frame}{Dice Loss — Funkcja straty}
+    \textbf{Problem:} Niezrównoważenie klas — zmiany nowotworowe $\ll$ tło
+    \vspace{0.3cm}
+
+    \textbf{Rozwiązanie:} Dice Loss — odporna na niezrównoważenie klas
+    \begin{equation*}
+        \text{Dice Loss} = 1 - \frac{2 \sum p_i \cdot g_i + \epsilon}{\sum p_i + \sum g_i + \epsilon}
+    \end{equation*}
+
+    \vspace{0.2cm}
+    \textbf{Zalety:}
+    \begin{itemize}
+        \item Bezpośrednia optymalizacja metryki ewaluacyjnej
+        \item Lepsza konwergencja dla małych obiektów
+        \item Naturalna odporność na dominację klasy tła
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Metryki ewaluacji segmentacji}
+    \begin{columns}
+        \column{0.5\textwidth}
+        \textbf{Dice Coefficient (F1-Score):}
+        \begin{equation*}
+            \text{Dice} = \frac{2 \cdot |P \cap G|}{|P| + |G|}
+        \end{equation*}
+        \begin{itemize}
+            \item Mierzy podobieństwo predykcji do ground truth
+            \item Zakres: [0, 1], gdzie 1 = idealne dopasowanie
+        \end{itemize}
+
+        \column{0.5\textwidth}
+        \textbf{IoU (Jaccard Index):}
+        \begin{equation*}
+            \text{IoU} = \frac{|P \cap G|}{|P \cup G|}
+        \end{equation*}
+        \begin{itemize}
+            \item Stosunek części wspólnej do sumy zbiorów
+            \item Bardziej rygorystyczna niż Dice
+        \end{itemize}
+    \end{columns}
+    \vspace{0.3cm}
+    \textbf{Relacja:} $\text{Dice} = \frac{2 \cdot \text{IoU}}{1 + \text{IoU}}$ — Dice $\geq$ IoU
+\end{frame}
+
 \begin{frame}{Wyniki ilościowe}
-    Ewaluacja na zbiorze testowym (10\% z 3000 obrazów):
+    Ewaluacja na zbiorze testowym (300 obrazów = 10\% zbioru):
     \begin{table}
         \centering
-        \begin{tabular}{|l|c|}
+        \begin{tabular}{|l|c|l|}
             \hline
-            \textbf{Metryka} & \textbf{Wartość} \\
+            \textbf{Metryka} & \textbf{Wartość} & \textbf{Interpretacja} \\
             \hline
-            Average Dice Coefficient & \textbf{0.77} \\
+            Dice Coefficient & \textbf{0.77} & Dobra zgodność segmentacji \\
             \hline
-            Average IoU & 0.68 \\
+            IoU (Jaccard) & 0.68 & Solidne pokrycie zmian \\
             \hline
-            Average Recall & 0.80 \\
+            Recall (Czułość) & 0.80 & Wysoka czułość diagnostyczna \\
             \hline
-            Average Precision & 0.78 \\
+            Precision & 0.78 & Niski poziom fałszywych alarmów \\
             \hline
         \end{tabular}
     \end{table}
-    Wysoki \textit{Recall} sugeruje wysoką czułość diagnostyczną modelu.
+    \vspace{0.2cm}
+    \textbf{Wniosek:} Wysoki Recall (0.80) jest kluczowy w diagnostyce medycznej — minimalizacja pominięć zmian nowotworowych.
 \end{frame}
 
 \begin{frame}{System interakcji (HCI)}

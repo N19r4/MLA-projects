@@ -9,6 +9,7 @@
 \usepackage[style=numeric,backend=biber]{biblatex}
 \usepackage{csquotes}
 \usepackage{float}
+\usepackage{amsmath}
 
 
 \addbibresource{bib.bib} 
@@ -88,11 +89,23 @@ Proces konceptualizacji projektu został utrwalony w formie mapy myśli, uwzglę
 \end{figure}
 
 \subsection{Zbiór danych i transformacje}
-Wykorzystano zbiór 3000 par obrazów (skany płuc i maski eksperckie). Zastosowano następujące transformacje danych:
+W projekcie wykorzystano publicznie dostępny zbiór danych \textbf{Lung Cancer Segmentation Dataset} pochodzący z platformy Kaggle. Dataset składa się z 3000 par obrazów: skanów tomografii komputerowej (CT) płuc oraz odpowiadających im masek segmentacyjnych przygotowanych przez ekspertów radiologów.
+
+\subsubsection{Charakterystyka zbioru danych}
 \begin{itemize}
-    \item Skalowanie intensywności do zakresu [0, 1].
-    \item Augmentacja: losowa rotacja o wielokrotność 90 stopni (p=0.5).
-    \item Standaryzacja rozmiaru przestrzennego do 512x512 pikseli.
+    \item \textbf{Źródło:} Kaggle - Lung Cancer Segmentation Dataset.
+    \item \textbf{Liczba próbek:} 3000 par (obraz CT + maska ekspercka).
+    \item \textbf{Format obrazów:} Pliki graficzne w skali szarości.
+    \item \textbf{Typ adnotacji:} Binarne maski segmentacyjne oznaczające obszary zmian nowotworowych.
+    \item \textbf{Podział danych:} 70\% trening, 20\% walidacja, 10\% test.
+\end{itemize}
+
+\subsubsection{Transformacje i augmentacja}
+Zastosowano następujące transformacje danych w celu przygotowania ich do procesu uczenia:
+\begin{itemize}
+    \item \textbf{Normalizacja intensywności:} Skalowanie wartości pikseli do zakresu [0, 1] w celu stabilizacji procesu uczenia.
+    \item \textbf{Augmentacja geometryczna:} Losowa rotacja o wielokrotność 90 stopni (prawdopodobieństwo p=0.5) w celu zwiększenia różnorodności danych treningowych i redukcji przeuczenia.
+    \item \textbf{Konwersja typów:} Transformacja do tensorów PyTorch typu float32.
 \end{itemize}
 
 \newpage
@@ -100,16 +113,65 @@ Wykorzystano zbiór 3000 par obrazów (skany płuc i maski eksperckie). Zastosow
 \section{Implementacja}
 
 \subsection{Architektura modelu}
-Wykorzystano architekturę \textbf{UNet} z biblioteki MONAI o następujących parametrach:
+W projekcie wykorzystano architekturę \textbf{U-Net}, która została zaproponowana przez Ronnebergera i współpracowników w 2015 roku specjalnie do zadań segmentacji obrazów biomedycznych.
+
+\subsubsection{Opis architektury U-Net}
+Architektura U-Net charakteryzuje się symetryczną strukturą w kształcie litery „U", składającą się z dwóch głównych części:
+
 \begin{itemize}
-    \item Wymiary przestrzenne: 2D.
-    \item Kanały wejściowe/wyjściowe: 1.
-    \item Struktura kanałów: (16, 32, 64, 128, 256) ze strefami kroku (strides) równymi 2.
-    \item Jednostki rezydualne: 2 na każdym poziomie.
+    \item \textbf{Ścieżka kurczenia (Encoder/Contracting Path):} Lewa strona sieci odpowiedzialna za ekstrakcję cech. Składa się z powtarzających się bloków: dwóch warstw konwolucyjnych 3x3 z aktywacją ReLU, po których następuje warstwa max pooling 2x2. Na każdym poziomie liczba kanałów cech jest podwajana, co pozwala na wychwytywanie coraz bardziej abstrakcyjnych reprezentacji obrazu.
+
+    \item \textbf{Ścieżka ekspansji (Decoder/Expanding Path):} Prawa strona sieci odpowiedzialna za rekonstrukcję przestrzenną. Wykorzystuje warstwy up-convolution (transpozycja konwolucyjna) 2x2 w celu zwiększenia rozdzielczości, połączone z odpowiadającymi mapami cech ze ścieżki kurczenia poprzez mechanizm \textit{skip connections}.
+
+    \item \textbf{Skip Connections:} Kluczowy element architektury, który łączy odpowiadające poziomy enkodera i dekodera. Umożliwia to zachowanie szczegółowych informacji przestrzennych, które są tracone podczas operacji pooling, co jest szczególnie istotne dla precyzyjnej lokalizacji granic segmentowanych obiektów.
+\end{itemize}
+
+\subsubsection{Konfiguracja modelu w MONAI}
+Wykorzystano implementację UNet z biblioteki MONAI (Medical Open Network for AI) o następujących parametrach:
+\begin{itemize}
+    \item \textbf{Wymiary przestrzenne:} 2D (spatial\_dims=2).
+    \item \textbf{Kanały wejściowe:} 1 (obrazy w skali szarości).
+    \item \textbf{Kanały wyjściowe:} 1 (binarna maska segmentacyjna).
+    \item \textbf{Struktura kanałów:} (16, 32, 64, 128, 256) — liczba filtrów na kolejnych poziomach.
+    \item \textbf{Strides:} (2, 2, 2, 2) — krok redukcji przestrzennej między poziomami.
 \end{itemize}
 
 \subsection{Proces treningowy}
-Model trenowano z użyciem optymalizatora Adam ($lr=0.001$) oraz funkcji straty \textbf{DiceLoss} z aktywacją sigmoid. Zastosowano mechanizm \textit{ReduceLROnPlateau} do dynamicznej regulacji tempa uczenia.
+
+\subsubsection{Funkcja straty — Dice Loss}
+W zadaniach segmentacji obrazów medycznych często występuje problem niezrównoważenia klas — obszary zmian chorobowych zajmują znacznie mniejszą część obrazu niż tło. Klasyczna funkcja straty cross-entropy w takich przypadkach może prowadzić do słabych wyników. Z tego powodu zastosowano funkcję straty \textbf{Dice Loss}.
+
+Dice Loss jest bezpośrednio powiązana ze współczynnikiem Dice (Dice Coefficient) i definiowana jest jako:
+
+\begin{equation}
+\text{Dice Loss} = 1 - \frac{2 \sum_{i=1}^{N} p_i \cdot g_i + \epsilon}{\sum_{i=1}^{N} p_i + \sum_{i=1}^{N} g_i + \epsilon}
+\end{equation}
+
+gdzie:
+\begin{itemize}
+    \item $p_i$ — wartość predykcji dla piksela $i$ (po aktywacji sigmoid),
+    \item $g_i$ — wartość ground truth dla piksela $i$ (0 lub 1),
+    \item $N$ — całkowita liczba pikseli,
+    \item $\epsilon$ — mały współczynnik wygładzający (smooth factor) zapobiegający dzieleniu przez zero.
+\end{itemize}
+
+\textbf{Zalety Dice Loss:}
+\begin{itemize}
+    \item Naturalna odporność na niezrównoważenie klas.
+    \item Bezpośrednia optymalizacja metryki używanej do ewaluacji.
+    \item Lepsza konwergencja dla obiektów o małej powierzchni.
+\end{itemize}
+
+\subsubsection{Konfiguracja procesu uczenia}
+Model trenowano z użyciem następujących parametrów:
+\begin{itemize}
+    \item \textbf{Optymalizator:} Adam z początkowym tempem uczenia $lr=0.001$.
+    \item \textbf{Funkcja straty:} DiceLoss z aktywacją sigmoid.
+    \item \textbf{Scheduler:} ReduceLROnPlateau — dynamiczna redukcja tempa uczenia o czynnik 0.1 przy braku poprawy przez 10 epok.
+    \item \textbf{Liczba epok:} 400.
+    \item \textbf{Rozmiar batcha:} 64.
+    \item \textbf{Early stopping:} Monitorowanie validation loss z cierpliwością 30 epok.
+\end{itemize}
 
 \newpage
 
@@ -117,13 +179,55 @@ Model trenowano z użyciem optymalizatora Adam ($lr=0.001$) oraz funkcji straty 
 Ewaluacja modelu została przeprowadzona na wydzielonym zbiorze testowym (10\% danych).
 
 \subsection{Metryki ilościowe}
-Wyniki uzyskane na zbiorze testowym prezentują się następująco:
+
+\subsubsection{Dice Coefficient (Współczynnik Dice / F1-Score)}
+Współczynnik Dice, znany również jako Sørensen-Dice coefficient lub F1-Score dla segmentacji, jest jedną z najczęściej stosowanych metryk do oceny jakości segmentacji obrazów medycznych. Mierzy on podobieństwo między predykcją modelu a ground truth.
+
+Współczynnik Dice definiowany jest jako:
+
+\begin{equation}
+\text{Dice} = \frac{2 \cdot |P \cap G|}{|P| + |G|} = \frac{2 \cdot TP}{2 \cdot TP + FP + FN}
+\end{equation}
+
+gdzie:
 \begin{itemize}
-    \item \textbf{Average Dice Coefficient: 0.77}
-    \item \textbf{Average Intersection over Union (IoU): 0.68}
-    \item Average Recall: 0.80
-    \item Average Precision: 0.78
+    \item $P$ — zbiór pikseli zaklasyfikowanych jako pozytywne (predykcja),
+    \item $G$ — zbiór pikseli ground truth (maska ekspercka),
+    \item $TP$ — true positives (poprawnie wykryte piksele zmiany),
+    \item $FP$ — false positives (błędnie wykryte piksele jako zmiana),
+    \item $FN$ — false negatives (pominięte piksele zmiany).
 \end{itemize}
+
+Wartość Dice mieści się w przedziale [0, 1], gdzie 1 oznacza idealne dopasowanie.
+
+\subsubsection{Intersection over Union (IoU / Jaccard Index)}
+IoU (Intersection over Union), znany również jako indeks Jaccarda, jest kolejną fundamentalną metryką w segmentacji obrazów. Mierzy stosunek części wspólnej do sumy zbiorów predykcji i ground truth.
+
+IoU definiowany jest jako:
+
+\begin{equation}
+\text{IoU} = \frac{|P \cap G|}{|P \cup G|} = \frac{TP}{TP + FP + FN}
+\end{equation}
+
+\textbf{Relacja między Dice a IoU:}
+Obie metryki są ze sobą powiązane matematycznie:
+\begin{equation}
+\text{Dice} = \frac{2 \cdot \text{IoU}}{1 + \text{IoU}} \quad \Leftrightarrow \quad \text{IoU} = \frac{\text{Dice}}{2 - \text{Dice}}
+\end{equation}
+
+Dice zawsze przyjmuje wartości wyższe lub równe IoU dla tego samego przypadku, ponieważ bardziej premiuje część wspólną.
+
+\subsubsection{Wyniki eksperymentalne}
+Wyniki uzyskane na zbiorze testowym (300 obrazów, 10\% całego zbioru) prezentują się następująco:
+\begin{itemize}
+    \item \textbf{Average Dice Coefficient: 0.77} — dobry poziom zgodności segmentacji.
+    \item \textbf{Average Intersection over Union (IoU): 0.68} — solidne pokrycie obszarów zmian.
+    \item \textbf{Average Recall: 0.80} — wysoka czułość wykrywania zmian nowotworowych.
+    \item \textbf{Average Precision: 0.78} — dobra precyzja z niskim poziomem fałszywych alarmów.
+\end{itemize}
+
+\textbf{Interpretacja wyników:}
+Uzyskany współczynnik Dice na poziomie 0.77 wskazuje, że model poprawnie identyfikuje około 77\% obszaru zmiany nowotworowej przy jednoczesnym zachowaniu niskiego poziomu fałszywie pozytywnych predykcji. Wysoki Recall (0.80) jest szczególnie istotny w kontekście diagnostyki medycznej, gdzie pominięcie zmiany nowotworowej może mieć poważne konsekwencje kliniczne.
 
 \subsection{Analiza wizualna}
 Poniżej przedstawiono przebieg funkcji straty oraz przykładowe predykcje modelu na tle masek wzorcowych.
